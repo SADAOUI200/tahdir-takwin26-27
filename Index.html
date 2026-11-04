@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <title>منصة تحضير التكوين</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+  <?!= include('Styles'); ?>
+</head>
+<body>
+
+<!-- تسجيل الدخول -->
+<section id="login" class="screen">
+  <div class="card">
+    <div class="logo">🏛️</div>
+    <h1>منصة تحضير التكوين</h1>
+    <p class="sub">وزارة التربية الوطنية — السنة التكوينية 2026/2027</p>
+    <label>اسم المستخدم</label>
+    <input id="lu" autocomplete="username" autocapitalize="off" placeholder="مثال: de01" dir="ltr">
+    <label>كلمة المرور</label>
+    <input id="lp" type="password" autocomplete="current-password" dir="ltr">
+    <div id="lerr" class="err"></div>
+    <button id="lbtn" class="btn pri wide">دخول</button>
+  </div>
+</section>
+
+<!-- تغيير كلمة المرور الإجباري -->
+<section id="chg" class="screen hidden">
+  <div class="card">
+    <h1>تغيير كلمة المرور</h1>
+    <p class="sub">لأسباب أمنية يجب تغيير كلمة المرور الأولية قبل المتابعة.</p>
+    <label>كلمة المرور الحالية</label><input id="c0" type="password" dir="ltr">
+    <label>كلمة المرور الجديدة (8 أحرف على الأقل، حروف وأرقام)</label><input id="c1" type="password" dir="ltr">
+    <label>تأكيد كلمة المرور الجديدة</label><input id="c2" type="password" dir="ltr">
+    <div id="cerr" class="err"></div>
+    <button id="cbtn" class="btn pri wide">حفظ ومتابعة</button>
+    <button id="ccancel" class="btn wide hidden">إلغاء</button>
+  </div>
+</section>
+
+<!-- التطبيق -->
+<div id="app" class="hidden">
+  <header class="top">
+    <div class="brand">🏛️ منصة تحضير التكوين</div>
+    <div class="who">
+      <span id="dirPick"></span>
+      <span id="whoName"></span>
+      <button id="btnPw" class="btn sm">🔑</button>
+      <button id="btnOut" class="btn sm">خروج</button>
+    </div>
+  </header>
+  <div class="body">
+    <nav id="nav"></nav>
+    <main id="main"></main>
+  </div>
+</div>
+
+<div id="modal" class="hidden"></div>
+<div id="toast"></div>
+<div id="printRoot"></div>
+<div id="exportRoot"></div>
+
+<?!= include('Client'); ?>
+</body>
+</html>

@@ -378,14 +378,21 @@ async function showTable(v) {
 }
 
 /* ============ القوائم الاسمية ============ */
+const hasSubj = t => t.subjects.length > 0 || !!t.freeSubject;
+const defSubj = t => (t.freeSubject ? '' : (t.subjects[0] || ''));
 const listKey = (t, rank) => t.ranks.length > 1 ? t.id + '|' + rank : t.id;
 function sortedRows(t, rows) {
-  const ord = t.subjects;
+  let ord = t.subjects;
+  if (t.freeSubject) {                       // الترتيب حسب أول ظهور لكل مادة مكتوبة
+    ord = [];
+    rows.forEach(r => { const k = (r.subject || '').trim(); if (((r.last || '').trim() || (r.first || '').trim()) && !ord.includes(k)) ord.push(k); });
+    rows = rows.map(r => Object.assign({}, r, { subject: (r.subject || '').trim() }));
+  }
   return rows.map((r, i) => ({ r, i })).filter(x => (x.r.last || '').trim() || (x.r.first || '').trim())
     .sort((a, b) => (ord.indexOf(a.r.subject) - ord.indexOf(b.r.subject)) || (a.i - b.i)).map(x => x.r);
 }
 function listDoc(t, rank, rows, o) {
-  const hasS = t.subjects.length > 0, showDir = !!o.showDir;
+  const hasS = hasSubj(t), showDir = !!o.showDir;
   let data = sortedRows(t, rows);
   if (!data.length) data = [{}, {}, {}].map(() => ({ subject: '', last: '', first: '', dirName: '' }));
   const spans = {}; data.forEach(r => spans[r.subject] = (spans[r.subject] || 0) + 1);
@@ -408,7 +415,7 @@ async function showList(v) {
   S.listType = t; S.listRank = v.rank; S.dirty = false;
   const rows = await gs('getList', S.token, listKey(t, v.rank), curDir());
   S.listRows = rows.map(r => ({ subject: r.subject, last: r.last, first: r.first, dirName: r.dirName }));
-  if (edit && !S.listRows.length) S.listRows.push({ subject: t.subjects[0] || '', last: '', first: '' });
+  if (edit && !S.listRows.length) S.listRows.push({ subject: defSubj(t), last: '', first: '' });
   const title = t.short + (t.ranks.length > 1 ? ' — ' + v.rank : '');
   main.innerHTML = `<div class="bar"><h2>${esc(title)}</h2><div class="acts">${actBtns(edit)}</div></div>${roBanner()}
     ${edit ? `<div class="acts" style="margin:8px 0"><button class="btn" id="bAdd">＋ إضافة سطر</button><button class="btn" id="bPaste">📋 لصق من Excel</button></div><div id="edHost"></div>` : ''}
@@ -416,7 +423,7 @@ async function showList(v) {
   bindActs();
   if (edit) {
     renderEditor();
-    $('#bAdd').onclick = () => { S.listRows.push({ subject: (S.listRows[S.listRows.length - 1] || {}).subject || t.subjects[0] || '', last: '', first: '' }); renderEditor(true); };
+    $('#bAdd').onclick = () => { S.listRows.push({ subject: (S.listRows[S.listRows.length - 1] || {}).subject || defSubj(t), last: '', first: '' }); renderEditor(true); };
     $('#bPaste').onclick = pasteDialog;
     $('#bSave').onclick = saveListNow;
   }
@@ -427,11 +434,11 @@ function renderListPreview() {
   $('#paper').innerHTML = listDoc(t, S.listRank, S.listRows, { showDir: isMin() && S.dir === 'ALL' });
 }
 function renderEditor(focusLast) {
-  const t = S.listType, hasS = t.subjects.length > 0;
+  const t = S.listType, hasS = hasSubj(t);
   $('#edHost').innerHTML = `<table class="ed"><thead><tr><th>#</th>${hasS ? '<th>مادة التخصص</th>' : ''}<th>اللقب</th><th>الاسم</th><th></th></tr></thead><tbody>` +
-    S.listRows.map((r, i) => `<tr><td>${i + 1}</td>${hasS ? `<td><select data-i="${i}" data-f="subject">${t.subjects.map(s => `<option ${s === r.subject ? 'selected' : ''}>${esc(s)}</option>`).join('')}</select></td>` : ''}
+    S.listRows.map((r, i) => `<tr><td>${i + 1}</td>${hasS ? (t.freeSubject ? `<td><input data-i="${i}" data-f="subject" list="subjHints" maxlength="60" placeholder="اكتب المادة" value="${esc(r.subject)}"></td>` : `<td><select data-i="${i}" data-f="subject">${t.subjects.map(s => `<option ${s === r.subject ? 'selected' : ''}>${esc(s)}</option>`).join('')}</select></td>`) : ''}
       <td><input data-i="${i}" data-f="last" maxlength="60" value="${esc(r.last)}"></td><td><input data-i="${i}" data-f="first" maxlength="60" value="${esc(r.first)}"></td>
-      <td><button class="btn sm danger" data-del="${i}">✕</button></td></tr>`).join('') + '</tbody></table>';
+      <td><button class="btn sm danger" data-del="${i}">✕</button></td></tr>`).join('') + '</tbody></table>' + (t.freeSubject ? `<datalist id="subjHints">${t.subjects.map(x => `<option value="${esc(x)}">`).join('')}</datalist>` : '');
   const host = $('#edHost'); let tm;
   host.oninput = host.onchange = e => {
     const i = e.target.dataset.i; if (i === undefined) return;
@@ -447,7 +454,7 @@ function renderEditor(focusLast) {
 function pasteDialog() {
   const t = S.listType, m = $('#modal');
   m.innerHTML = `<div class="card"><h1>لصق أسماء من Excel</h1><p class="sub">انسخ عمودين (اللقب ثم الاسم) والصقهما هنا — سطر لكل شخص.</p>
-    ${t.subjects.length ? `<label>مادة التخصص</label><select id="pSub">${t.subjects.map(s => `<option>${esc(s)}</option>`).join('')}</select>` : ''}
+    ${t.freeSubject ? `<label>مادة التخصص</label><input id="pSub" list="pHints" maxlength="60"><datalist id="pHints">${t.subjects.map(x => `<option value="${esc(x)}">`).join('')}</datalist>` : (t.subjects.length ? `<label>مادة التخصص</label><select id="pSub">${t.subjects.map(s => `<option>${esc(s)}</option>`).join('')}</select>` : '')}
     <label>الأسماء</label><textarea id="pTxt" rows="9"></textarea>
     <div style="display:flex;gap:8px;margin-top:12px"><button class="btn pri" id="pOk" style="flex:1">إضافة</button><button class="btn" id="pNo">إلغاء</button></div></div>`;
   show('#modal');
@@ -469,7 +476,7 @@ async function saveListNow() {
     const clean = sortedRows(S.listType, S.listRows);
     await gs('saveList', S.token, listKey(S.listType, S.listRank), clean);
     S.dirty = false; toast('✔ تم الحفظ (' + clean.length + ' اسماً)');
-    S.listRows = clean.length ? clean : [{ subject: S.listType.subjects[0] || '', last: '', first: '' }];
+    S.listRows = clean.length ? clean : [{ subject: defSubj(S.listType), last: '', first: '' }];
     renderEditor(); renderListPreview();
   } catch (e) { fail(e); } finally { busy(b, false); }
 }

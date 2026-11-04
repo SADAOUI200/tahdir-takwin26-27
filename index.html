@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <title>منصة تحضير التكوين</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+*{box-sizing:border-box}
+html,body{margin:0;font-family:'Cairo',Tahoma,sans-serif;background:#eef1f5;color:#1d2733;font-size:15px}
+.hidden{display:none!important}
+.btn{font:inherit;border:1px solid #c5ccd6;background:#fff;border-radius:8px;padding:7px 14px;cursor:pointer}
+.btn:hover{background:#f2f5f9}.btn.pri{background:#0b6b4f;border-color:#0b6b4f;color:#fff}.btn.pri:hover{background:#095a43}
+.btn.sm{padding:4px 10px;font-size:13px}.btn.wide{width:100%;margin-top:14px;padding:10px}.btn.danger{color:#b3261e;border-color:#e0b4b0}
+.btn:disabled{opacity:.55;cursor:wait}
+input,select,textarea{font:inherit;border:1px solid #c5ccd6;border-radius:8px;padding:8px 10px;width:100%;background:#fff}
+.screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+.card{background:#fff;border-radius:16px;box-shadow:0 6px 30px #0002;padding:28px;width:100%;max-width:400px}
+.card h1{margin:4px 0;font-size:22px;text-align:center}.card .logo{font-size:40px;text-align:center}
+.card .sub{color:#667;text-align:center;margin:0 0 14px;font-size:13px}.card label{display:block;margin:10px 0 4px;font-size:13px;color:#445}
+.err{color:#b3261e;font-size:13px;min-height:18px;margin-top:8px}
+.top{background:#0b6b4f;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:10px 18px;position:sticky;top:0;z-index:5}
+.brand{font-weight:700;font-size:17px}.who{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.who select{width:auto;padding:4px 8px;font-size:13px}
+.body{display:flex;align-items:flex-start;gap:16px;padding:16px}
+nav{width:255px;flex:none;background:#fff;border-radius:12px;padding:8px;position:sticky;top:64px;max-height:calc(100vh - 80px);overflow:auto}
+nav h4{margin:12px 8px 4px;font-size:12px;color:#889}
+nav button{display:block;width:100%;text-align:right;font:inherit;font-size:13.5px;border:0;background:none;padding:7px 10px;border-radius:8px;cursor:pointer;color:#223}
+nav button:hover{background:#eef3f0}nav button.on{background:#0b6b4f;color:#fff}
+main{flex:1;min-width:0}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.bar h2{margin:0;font-size:20px}.acts{display:flex;gap:8px;flex-wrap:wrap}
+.scroll{overflow:auto;background:#cfd6de;border-radius:10px;padding:14px}
+.note,.warn,.ro{padding:10px 14px;border-radius:10px;margin:8px 0;font-size:14px}
+.note{background:#e8f1fb}.warn{background:#fff4d6;border:1px solid #f0d58a}.ro{background:#efe9fb}
+.cbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}.cbar select{width:auto;min-width:200px}
+.load{padding:40px;text-align:center;color:#667}
+.tbl{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;font-size:13.5px}
+.tbl th,.tbl td{padding:7px 9px;border-bottom:1px solid #e6e9ee;text-align:right}.tbl th{background:#f3f5f8}
+.tbl tr.click{cursor:pointer}.tbl tr.click:hover{background:#f1f8f5}
+.chip{display:inline-block;padding:2px 8px;border-radius:99px;font-size:12px;background:#e8ebef}
+.chip.ok{background:#d9f2e6;color:#0a6b3f}.chip.mid{background:#fff0c9;color:#7a5800}.chip.no{background:#fde0de;color:#a3241b}
+.kpis{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}.kpi{background:#fff;border-radius:12px;padding:10px 16px;min-width:130px}
+.kpi b{display:block;font-size:22px}
+.ed{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;margin:8px 0}
+.ed th,.ed td{padding:4px 6px;border-bottom:1px solid #eceff3}.ed th{background:#f3f5f8;font-size:13px}.ed input,.ed select{padding:6px 8px}
+.ed td:first-child{width:38px;text-align:center;color:#889}
+#modal{position:fixed;inset:0;background:#0008;z-index:20;display:flex;align-items:center;justify-content:center;padding:16px}
+#modal .card{max-width:520px}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1d2733;color:#fff;padding:10px 18px;border-radius:10px;opacity:0;pointer-events:none;transition:.25s;z-index:30}
+#toast.show{opacity:1}#toast.bad{background:#b3261e}
+
+/* ===== الورقة (نموذج الطباعة) ===== */
+.paper{background:#fff;color:#000;font-family:'Amiri','Traditional Arabic',serif;direction:rtl;padding:26px 34px;margin:0 auto;box-shadow:0 1px 8px #0003;line-height:1.5;font-size:15px}
+.paper.portrait{width:794px;min-height:900px}.paper.landscape{width:1123px}
+.paper.export{box-shadow:none;min-height:0;margin:0}
+.paper .rep{text-align:center;font-weight:700;font-size:21px}.paper .min{text-align:center;font-weight:700;font-size:19px;margin-top:2px}
+.paper .dl{font-weight:700;font-size:16px;margin:8px 0 12px}
+.paper .box{border:1px solid #888;border-radius:14px;background:linear-gradient(#f4f4f4,#d9d9d9);text-align:center;font-weight:700;font-size:19px;padding:16px 20px;margin:10px 40px 20px;line-height:2}
+.paper .meta{font-size:16px;margin:3px 0}.paper .meta.sub{padding-right:12px;font-size:15px}
+.paper table{border-collapse:collapse}
+.paper .lst{margin:18px auto;width:92%}.paper .lst th,.paper .lst td{border:1px solid #000;padding:5px 10px;text-align:center;font-size:15px}.paper .lst th{font-weight:700}
+.paper .lst td.n{font-weight:700;width:60px}.paper .lst td.sj{font-weight:700}
+.paper .rnote{font-size:15px;margin:10px 40px}.paper .rnote div{padding-right:28px}
+.paper .tno{font-weight:700;font-size:18px;text-align:center}.paper .ttl{font-weight:700;font-size:15.5px;text-align:center;margin:2px 20px 6px}
+.paper .ctr,.paper .yr{font-weight:700;font-size:14px;text-align:center}
+.paper .rk{font-weight:700;font-size:14px;margin:8px 0 2px}
+.paper .cnt{margin-bottom:6px}.paper .cnt th,.paper .cnt td{border:1px solid #000;font-size:12px;text-align:center;padding:0;height:22px}
+.paper .cnt th.lab,.paper .cnt td.lab{width:220px;padding:0 6px;text-align:right;font-weight:700;font-size:11.5px;background:#fff}
+.paper .cnt thead th{background:#dcdcdc}.paper .cnt td.tot,.paper .cnt tr.sum td{font-weight:700;background:#f1f1f1}
+.paper .cnt th.vth{height:112px;width:34px;position:relative}
+.paper .cnt th.vth span{position:absolute;left:50%;top:50%;width:106px;transform:translate(-50%,-50%) rotate(-90deg);white-space:nowrap;font-size:11.5px}
+.paper .cnt td{min-width:34px}
+.paper .cnt input{width:100%;border:0;border-radius:0;padding:2px 0;text-align:center;font:inherit;font-size:13px;background:#fffdf0;-moz-appearance:textfield}
+.paper .cnt input::-webkit-outer-spin-button,.paper .cnt input::-webkit-inner-spin-button{-webkit-appearance:none}
+.paper .ft{display:flex;justify-content:space-between;margin:14px 20px 0;font-weight:700;font-size:15px}
+#printRoot{display:none}#exportRoot{position:fixed;left:-12000px;top:0}
+@media(max-width:860px){.body{flex-direction:column}nav{width:100%;position:static;max-height:220px}}
+@media print{
+  body{background:#fff}
+  body>*:not(#printRoot){display:none!important}
+  #printRoot{display:block!important}
+  #printRoot .paper{box-shadow:none;margin:0;min-height:0}
+}
+</style>
+
+</head>
+<body>
+
+<!-- تسجيل الدخول -->
+<section id="login" class="screen">
+  <div class="card">
+    <div class="logo">🏛️</div>
+    <h1>منصة تحضير التكوين</h1>
+    <p class="sub">وزارة التربية الوطنية — السنة التكوينية 2026/2027</p>
+    <label>اسم المستخدم</label>
+    <input id="lu" autocomplete="username" autocapitalize="off" placeholder="مثال: de01" dir="ltr">
+    <label>كلمة المرور</label>
+    <input id="lp" type="password" autocomplete="current-password" dir="ltr">
+    <div id="lerr" class="err"></div>
+    <button id="lbtn" class="btn pri wide">دخول</button>
+  </div>
+</section>
+
+<!-- تغيير كلمة المرور الإجباري -->
+<section id="chg" class="screen hidden">
+  <div class="card">
+    <h1>تغيير كلمة المرور</h1>
+    <p class="sub">لأسباب أمنية يجب تغيير كلمة المرور الأولية قبل المتابعة.</p>
+    <label>كلمة المرور الحالية</label><input id="c0" type="password" dir="ltr">
+    <label>كلمة المرور الجديدة (8 أحرف على الأقل، حروف وأرقام)</label><input id="c1" type="password" dir="ltr">
+    <label>تأكيد كلمة المرور الجديدة</label><input id="c2" type="password" dir="ltr">
+    <div id="cerr" class="err"></div>
+    <button id="cbtn" class="btn pri wide">حفظ ومتابعة</button>
+    <button id="ccancel" class="btn wide hidden">إلغاء</button>
+  </div>
+</section>
+
+<!-- التطبيق -->
+<div id="app" class="hidden">
+  <header class="top">
+    <div class="brand">🏛️ منصة تحضير التكوين</div>
+    <div class="who">
+      <span id="dirPick"></span>
+      <span id="whoName"></span>
+      <button id="btnPw" class="btn sm">🔑</button>
+      <button id="btnOut" class="btn sm">خروج</button>
+    </div>
+  </header>
+  <div class="body">
+    <nav id="nav"></nav>
+    <main id="main"></main>
+  </div>
+</div>
+
+<div id="modal" class="hidden"></div>
+<div id="toast"></div>
+<div id="printRoot"></div>
+<div id="exportRoot"></div>
+
+<script src="config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+'use strict';
+/* ============ أدوات عامة ============ */
+const $ = (s, r) => (r || document).querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const pad = n => String(n).padStart(2, '0');
+const KEY = (l, f, s) => l + '|' + f + '|' + s;
+const sum = m => Object.values(m).reduce((a, b) => a + (+b || 0), 0);
+const addMaps = (...ms) => { const o = {}; ms.forEach(m => Object.keys(m || {}).forEach(k => o[k] = (o[k] || 0) + (+m[k] || 0))); return o; };
+const show = (sel, on) => $(sel).classList.toggle('hidden', on === false);
+const S = { token: null, user: null, cfg: null, dir: 'ALL', view: null, draft: {}, counts: null, center: null, pending: [],
+            dirty: false, listRows: [], listType: null, listRank: null };
+const isMin = () => S.user && S.user.role === 'ministry';
+const curDir = () => (isMin() ? S.dir : '');
+const dirName = c => { const d = S.cfg.directorates.find(x => x.code === c); return d ? d.name : c; };
+const dirLabel = () => (isMin() ? (S.dir === 'ALL' ? null : dirName(S.dir)) : S.user.dirName);
+const dirTag = () => (isMin() ? S.dir : S.user.dirCode);
+
+function gs(fn, ...a) {
+  if (window.google && google.script && google.script.run) {           // داخل Apps Script
+    return new Promise((ok, ko) => google.script.run.withSuccessHandler(ok).withFailureHandler(ko)[fn](...a));
+  }
+  const url = window.APP_API_URL;                                      // من GitHub Pages
+  if (!url || url.indexOf('PUT_') >= 0) return Promise.reject(new Error('لم يُضبط رابط الخادم في config.js'));
+  return fetch(url, { method: 'POST', body: JSON.stringify({ fn: fn, args: a }) })   // دون headers لتجنب preflight
+    .then(r => r.json())
+    .then(j => { if (!j.ok) throw new Error(j.error); return j.result; });
+}
+let tt;
+function toast(m, bad) { const t = $('#toast'); t.textContent = m; t.className = 'show' + (bad ? ' bad' : ''); clearTimeout(tt); tt = setTimeout(() => t.className = '', 3800); }
+function fail(e) {
+  const m = (e && e.message) || String(e);
+  if (m.includes('AUTH')) { logoutLocal('انتهت الجلسة، سجّل الدخول من جديد.'); return; }
+  if (m.includes('MUSTCHANGE')) { show('#app', false); show('#chg'); return; }
+  toast(m.replace(/^Error:\s*/, ''), true);
+}
+function busy(btn, on) { btn.disabled = on; }
+
+/* ============ الدخول والخروج ============ */
+async function doLogin() {
+  const b = $('#lbtn'); $('#lerr').textContent = ''; busy(b, true);
+  try {
+    const r = await gs('login', $('#lu').value, $('#lp').value);
+    if (!r.ok) { $('#lerr').textContent = r.error; return; }
+    S.token = r.token; S.user = r.user; S.cfg = r.config; $('#lp').value = '';
+    if (r.user.mustChange) { show('#login', false); show('#chg'); } else start();
+  } catch (e) { $('#lerr').textContent = 'تعذر الاتصال بالخادم، أعد المحاولة.'; }
+  finally { busy(b, false); }
+}
+async function doChange() {
+  $('#cerr').textContent = '';
+  if ($('#c1').value !== $('#c2').value) { $('#cerr').textContent = 'تأكيد كلمة المرور غير مطابق.'; return; }
+  const b = $('#cbtn'); busy(b, true);
+  try {
+    await gs('changePassword', S.token, $('#c0').value, $('#c1').value);
+    S.user.mustChange = false; ['#c0', '#c1', '#c2'].forEach(i => $(i).value = '');
+    show('#chg', false); show('#ccancel', false); toast('تم تغيير كلمة المرور'); start();
+  } catch (e) {
+    const m = (e.message || '').replace(/^Error:\s*/, '');
+    if (m.includes('AUTH')) return fail(e);
+    $('#cerr').textContent = m;
+  } finally { busy(b, false); }
+}
+function logoutLocal(msg) {
+  S.token = null; S.user = null; S.pending = []; S.dirty = false;
+  show('#app', false); show('#chg', false); show('#login'); $('#lerr').textContent = msg || '';
+}
+async function doLogout() { const t = S.token; logoutLocal(''); try { await gs('logout', t); } catch (e) {} }
+
+/* ============ هيكل التطبيق ============ */
+function start() {
+  show('#login', false); show('#chg', false); show('#app');
+  $('#whoName').textContent = S.user.dirName;
+  const dp = $('#dirPick'); dp.innerHTML = '';
+  if (isMin()) {
+    S.dir = 'ALL';
+    dp.innerHTML = '<select id="dirSel"><option value="ALL">— كل المديريات (الحصيلة الوطنية) —</option>' +
+      S.cfg.directorates.map(d => `<option value="${d.code}">${d.code} — ${esc(d.name)}</option>`).join('') + '</select>';
+    $('#dirSel').onchange = e => { if (!leave()) { e.target.value = S.dir; return; } S.dir = e.target.value; S.center = null; S.pending = []; go(S.view); };
+  }
+  buildNav();
+  go(isMin() ? { kind: 'dash' } : { kind: 'T', id: 'T1' });
+}
+function leave() { if (S.dirty && !confirm('لديك تعديلات غير محفوظة، هل تريد تجاهلها؟')) return false; S.dirty = false; return true; }
+function sameView(a, b) { return a && b && a.kind === b.kind && a.id === b.id && a.rank === b.rank; }
+function buildNav() {
+  const items = [];
+  if (isMin()) items.push({ h: 'المتابعة' }, { label: '📊 لوحة متابعة المديريات', v: { kind: 'dash' } });
+  items.push({ h: 'الجداول التعدادية' });
+  S.cfg.tables.forEach(t => items.push({ label: 'جدول رقم ' + t.no + (t.computed ? ' (آلي)' : ''), v: { kind: 'T', id: t.id } }));
+  items.push({ h: 'القوائم الاسمية' });
+  S.cfg.listTypes.forEach(t => t.ranks.forEach(r => items.push({
+    label: t.ranks.length > 1 ? t.short + ' — ' + r : t.short, v: { kind: 'L', id: t.id, rank: r } })));
+  const nav = $('#nav'); nav.innerHTML = '';
+  items.forEach(it => {
+    if (it.h) { nav.insertAdjacentHTML('beforeend', `<h4>${it.h}</h4>`); return; }
+    const b = document.createElement('button'); b.textContent = it.label; b._v = it.v;
+    b.onclick = () => { if (leave()) go(it.v); };
+    nav.appendChild(b);
+  });
+}
+function markNav() { document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', sameView(b._v, S.view))); }
+
+async function go(v) {
+  S.view = v; markNav();
+  $('#main').innerHTML = '<div class="load">⏳ جاري التحميل…</div>';
+  try {
+    if (v.kind === 'dash') await showDash();
+    else if (v.kind === 'T') await showTable(v);
+    else await showList(v);
+  } catch (e) { fail(e); $('#main').innerHTML = ''; }
+}
+const roBanner = () => isMin() ? `<div class="ro">👁 وضع الاطلاع (قراءة فقط) — ${S.dir === 'ALL' ? 'الحصيلة الوطنية لجميع المديريات' : 'بيانات مديرية ' + esc(dirName(S.dir))}</div>` : '';
+const actBtns = edit => `${edit ? '<button class="btn pri" id="bSave">💾 حفظ</button>' : ''}<button class="btn" id="bPrint">🖨 طباعة</button><button class="btn" id="bPdf">⬇ تحميل PDF</button>`;
+function bindActs() { $('#bPrint').onclick = doPrint; $('#bPdf').onclick = doPdf; }
+
+/* ============ لوحة المتابعة (الوزارة) ============ */
+async function showDash() {
+  const rows = await gs('getStatus', S.token);
+  const started = rows.filter(r => r.t1 + r.t2 + r.lists > 0).length;
+  const T = k => rows.reduce((a, r) => a + r[k], 0);
+  const chip = r => !r.lastLogin ? '<span class="chip no">لم تدخل</span>' : !r.changed ? '<span class="chip mid">كلمة المرور لم تُغيَّر</span>'
+    : (r.t1 + r.t2 + r.lists > 0 ? '<span class="chip ok">بدأت الإدخال</span>' : '<span class="chip mid">دون بيانات</span>');
+  $('#main').innerHTML = `<div class="bar"><h2>لوحة متابعة المديريات</h2></div>
+  <div class="kpis"><div class="kpi"><b>${started} / ${rows.length}</b>مديريات بدأت الإدخال</div>
+  <div class="kpi"><b>${T('t1')}</b>ناجحون (ج 01)</div><div class="kpi"><b>${T('t2')}</b>احتياطيون (ج 02)</div>
+  <div class="kpi"><b>${T('t1') + T('t2')}</b>المجموع (ج 03)</div><div class="kpi"><b>${T('lists')}</b>أسماء في القوائم</div></div>
+  <div class="note">اضغط على سطر مديرية للاطلاع على بياناتها. زر 🔄 يعيد كلمة المرور الأولية ويفرض تغييرها عند الدخول.</div>
+  <div style="overflow:auto"><table class="tbl"><thead><tr><th>الرمز</th><th>المديرية</th><th>الحساب</th><th>آخر دخول</th><th>ج01</th><th>ج02</th><th>مراكز</th><th>ج04</th><th>أسماء</th><th>آخر تحديث</th><th>الحالة</th><th></th></tr></thead><tbody>` +
+    rows.map(r => `<tr class="click" data-c="${r.code}"><td>${r.code}</td><td>${esc(r.name)}</td><td dir="ltr">${esc(r.username)}</td><td>${r.lastLogin || '—'}</td>
+    <td>${r.t1}</td><td>${r.t2}</td><td>${r.centers}</td><td>${r.t4}</td><td>${r.lists}</td><td>${r.upd || '—'}</td><td>${chip(r)}</td>
+    <td><button class="btn sm" data-r="${r.code}" title="إعادة تعيين كلمة المرور">🔄</button></td></tr>`).join('') + '</tbody></table></div>';
+  $('#main').querySelectorAll('tr.click').forEach(tr => tr.onclick = e => {
+    if (e.target.dataset.r) return;
+    S.dir = tr.dataset.c; $('#dirSel').value = S.dir; go({ kind: 'T', id: 'T1' });
+  });
+  $('#main').querySelectorAll('[data-r]').forEach(b => b.onclick = async () => {
+    if (!confirm('إعادة تعيين كلمة مرور هذه المديرية إلى القيمة الأولية؟')) return;
+    try { await gs('resetDirPassword', S.token, b.dataset.r); toast('تمت إعادة التعيين'); } catch (e) { fail(e); }
+  });
+}
+
+/* ============ الجداول التعدادية ============ */
+const paperHead = () => {
+  const dl = dirLabel();
+  return `<div class="rep">الجمهورية الجزائرية الديمقراطية الشعبية</div><div class="min">وزارة التربية الوطنية</div>
+  <div class="dl">${dl === null ? 'جميع مديريات التربية (الحصيلة الوطنية)' : 'مديرية التربية لولاية ' + esc(dl)}</div>`;
+};
+const paperFoot = () => `<div class="ft"><div>حرر بـ: ................... في: ...................</div><div>إمضاء وختم مدير(ة) التربية</div></div>`;
+
+function levelBlock(lv, data, ed) {
+  const L = S.cfg.levels[lv], fs = Object.entries(L.formations);
+  const cell = (f, s) => {
+    const k = KEY(lv, f, s), v = +data[k] || 0;
+    return ed ? `<input class="ci" type="number" min="0" max="9999" inputmode="numeric" data-k="${esc(k)}" value="${v || ''}">` : (v || '');
+  };
+  return `<div class="rk">رتبة: ${esc(L.label)}</div><table class="cnt"><thead><tr><th class="lab">نوع التكوين / مادة التدريس</th>` +
+    L.subjects.map(s => `<th class="vth"><span>${esc(s)}</span></th>`).join('') + `<th class="vth"><span>المجموع</span></th></tr></thead><tbody>` +
+    fs.map(([f, lab]) => `<tr><td class="lab">${esc(lab)}</td>${L.subjects.map(s => `<td>${cell(f, s)}</td>`).join('')}<td class="tot" data-t="r~${lv}~${f}"></td></tr>`).join('') +
+    `<tr class="sum"><td class="lab">المجموع</td>${L.subjects.map(s => `<td data-t="c~${lv}~${esc(s)}"></td>`).join('')}<td data-t="g~${lv}~"></td></tr></tbody></table>`;
+}
+function countsDoc(t, data, o) {
+  return paperHead() + `<div class="tno">جدول رقم: ${t.no}</div><div class="ttl">${esc(t.title)}</div>` +
+    (t.id === 'T4' ? `<div class="ctr">إسم مركز التكوين: ${esc(o.center || '..............................')}</div>` : '') +
+    `<div class="yr">السنة التكوينية ${esc(S.cfg.app.year)}</div>` +
+    ['sec', 'mid', 'pri'].map(lv => levelBlock(lv, data, o.editable)).join('') + paperFoot();
+}
+function recalc(root, data) {
+  root.querySelectorAll('[data-t]').forEach(el => {
+    const [type, lv, a] = el.dataset.t.split('~'), L = S.cfg.levels[lv]; let s = 0;
+    Object.keys(L.formations).forEach(f => L.subjects.forEach(sj => {
+      if ((type === 'r' && f !== a) || (type === 'c' && sj !== a)) return;
+      s += +data[KEY(lv, f, sj)] || 0;
+    }));
+    el.textContent = s;
+  });
+}
+
+async function showTable(v) {
+  const t = S.cfg.tables.find(x => x.id === v.id), main = $('#main');
+  const c = S.counts = await gs('getCounts', S.token, curDir());
+  const head = `<div class="bar"><h2>جدول رقم ${t.no}</h2></div>${roBanner()}`;
+  if (t.id === 'T4' && isMin() && S.dir === 'ALL') {
+    main.innerHTML = head + '<div class="note">الجدول 04 خاص بمراكز كل مديرية: اختر مديرية من القائمة أعلاه لعرض مراكزها، أو راجع الجدول 05 للحصيلة الإجمالية.</div>'; return;
+  }
+  const edit = !isMin() && !!t.editable;
+  let data, centers = [];
+  if (t.id === 'T1' || t.id === 'T2') data = c[t.id];
+  else if (t.id === 'T3') data = addMaps(c.T1, c.T2);
+  else if (t.id === 'T4') {
+    centers = Object.keys(c.T4); S.pending.forEach(x => { if (!centers.includes(x)) centers.push(x); });
+    if (!centers.includes(S.center)) S.center = centers[0] || null;
+    data = S.center ? (c.T4[S.center] || {}) : {};
+  } else data = addMaps(...Object.values(c.T4));
+  S.draft = Object.assign({}, data); S.dirty = false;
+
+  const t3 = sum(addMaps(c.T1, c.T2)), t5 = sum(addMaps(...Object.values(c.T4)));
+  const warn = (['T3', 'T4', 'T5'].includes(t.id) && t3 !== t5)
+    ? `<div class="warn">⚠ مجموع الجدول 03 (${t3}) لا يساوي مجموع مراكز التكوين — الجدول 05 (${t5}). تأكد من توزيع كل الأساتذة على المراكز.</div>` : '';
+  let cbar = '';
+  if (t.id === 'T4') {
+    cbar = `<div class="cbar"><label>مركز التكوين:</label><select id="cSel">${centers.map(x => `<option ${x === S.center ? 'selected' : ''}>${esc(x)}</option>`).join('')}</select>` +
+      (edit ? '<button class="btn" id="cNew">＋ مركز جديد</button>' + (S.center ? '<button class="btn danger" id="cDel">حذف المركز</button>' : '') : '') + '</div>' +
+      (!S.center ? `<div class="note">${edit ? 'اضغط «مركز جديد» لإضافة أول مركز تكوين.' : 'لا توجد مراكز مسجلة.'}</div>` : '');
+  }
+  const canEdit = edit && (t.id !== 'T4' || !!S.center);
+  main.innerHTML = `<div class="bar"><h2>جدول رقم ${t.no}</h2><div class="acts">${actBtns(canEdit)}</div></div>${roBanner()}${cbar}${warn}
+    <div class="scroll"><div class="paper landscape" id="paper">${countsDoc(t, S.draft, { editable: canEdit, center: S.center })}</div></div>`;
+  const paper = $('#paper'); recalc(paper, S.draft); bindActs();
+  paper.addEventListener('input', e => {
+    if (!e.target.classList.contains('ci')) return;
+    let n = parseInt(e.target.value, 10); n = isNaN(n) || n < 0 ? 0 : Math.min(n, 9999);
+    if (n) S.draft[e.target.dataset.k] = n; else delete S.draft[e.target.dataset.k];
+    S.dirty = true; recalc(paper, S.draft);
+  });
+  if (t.id === 'T4') {
+    $('#cSel').onchange = e => { if (!leave()) { e.target.value = S.center; return; } S.center = e.target.value; showTable(v).catch(fail); };
+    if ($('#cNew')) $('#cNew').onclick = () => {
+      if (!leave()) return;
+      const n = (prompt('اسم مركز التكوين الجديد:') || '').trim().slice(0, 60); if (!n) return;
+      if (!centers.includes(n)) S.pending.push(n); S.center = n; showTable(v).catch(fail);
+    };
+    if ($('#cDel')) $('#cDel').onclick = async () => {
+      if (!confirm('حذف المركز «' + S.center + '» وكل بياناته؟')) return;
+      try { if (c.T4[S.center]) await gs('deleteCenter', S.token, S.center); S.pending = S.pending.filter(x => x !== S.center); S.center = null; S.dirty = false; toast('تم الحذف'); showTable(v); } catch (e) { fail(e); }
+    };
+  }
+  if (canEdit) $('#bSave').onclick = async () => {
+    const b = $('#bSave'); busy(b, true);
+    try {
+      await gs('saveCounts', S.token, t.id, t.id === 'T4' ? S.center : '', S.draft);
+      S.pending = S.pending.filter(x => x !== S.center); S.dirty = false; toast('✔ تم الحفظ'); showTable(v);
+    } catch (e) { fail(e); busy(b, false); }
+  };
+}
+
+/* ============ القوائم الاسمية ============ */
+const listKey = (t, rank) => t.ranks.length > 1 ? t.id + '|' + rank : t.id;
+function sortedRows(t, rows) {
+  const ord = t.subjects;
+  return rows.map((r, i) => ({ r, i })).filter(x => (x.r.last || '').trim() || (x.r.first || '').trim())
+    .sort((a, b) => (ord.indexOf(a.r.subject) - ord.indexOf(b.r.subject)) || (a.i - b.i)).map(x => x.r);
+}
+function listDoc(t, rank, rows, o) {
+  const hasS = t.subjects.length > 0, showDir = !!o.showDir;
+  let data = sortedRows(t, rows);
+  if (!data.length) data = [{}, {}, {}].map(() => ({ subject: '', last: '', first: '', dirName: '' }));
+  const spans = {}; data.forEach(r => spans[r.subject] = (spans[r.subject] || 0) + 1);
+  let cnt = 0, prev = null, body = '';
+  data.forEach(r => {
+    const first = hasS && r.subject !== prev; cnt = hasS ? (first ? 1 : cnt + 1) : cnt + 1; prev = r.subject;
+    body += `<tr><td class="n">${pad(cnt)}</td><td>${esc(r.last)}</td><td>${esc(r.first)}</td>${showDir ? `<td>${esc(r.dirName || '')}</td>` : ''}` +
+      (hasS && first ? `<td class="sj" rowspan="${spans[r.subject]}">${esc(r.subject)}</td>` : '') + '</tr>';
+  });
+  return paperHead() + `<div class="box">${esc(t.title)}</div>
+  <div class="meta"><b>- الرتبــة:</b> ${esc(rank)}</div>
+  <div class="meta"><b>- طريقة الإلتحاق بالتكوين :</b> ${esc(t.method)}</div>
+  <div class="meta sub">${esc(t.methodNote)}</div>
+  <table class="lst"><thead><tr><th>الرقم</th><th>اللقب</th><th>الاسم</th>${showDir ? '<th>المديرية</th>' : ''}${hasS ? '<th>مادة التخصص</th>' : ''}</tr></thead><tbody>${body}</tbody></table>` +
+  (t.rankNote ? `<div class="rnote"><b>ملاحظة :</b><div>• الرتب المعنية بهذا الجدول:</div>${t.ranks.map(r => `<div style="padding-right:50px">- ${esc(r)}</div>`).join('')}<div>• تصنف كل رتبة على حدى.</div></div>` : '') + paperFoot();
+}
+
+async function showList(v) {
+  const t = S.cfg.listTypes.find(x => x.id === v.id), main = $('#main'), edit = !isMin();
+  S.listType = t; S.listRank = v.rank; S.dirty = false;
+  const rows = await gs('getList', S.token, listKey(t, v.rank), curDir());
+  S.listRows = rows.map(r => ({ subject: r.subject, last: r.last, first: r.first, dirName: r.dirName }));
+  if (edit && !S.listRows.length) S.listRows.push({ subject: t.subjects[0] || '', last: '', first: '' });
+  const title = t.short + (t.ranks.length > 1 ? ' — ' + v.rank : '');
+  main.innerHTML = `<div class="bar"><h2>${esc(title)}</h2><div class="acts">${actBtns(edit)}</div></div>${roBanner()}
+    ${edit ? `<div class="acts" style="margin:8px 0"><button class="btn" id="bAdd">＋ إضافة سطر</button><button class="btn" id="bPaste">📋 لصق من Excel</button></div><div id="edHost"></div>` : ''}
+    <div class="scroll"><div class="paper portrait" id="paper"></div></div>`;
+  bindActs();
+  if (edit) {
+    renderEditor();
+    $('#bAdd').onclick = () => { S.listRows.push({ subject: (S.listRows[S.listRows.length - 1] || {}).subject || t.subjects[0] || '', last: '', first: '' }); renderEditor(true); };
+    $('#bPaste').onclick = pasteDialog;
+    $('#bSave').onclick = saveListNow;
+  }
+  renderListPreview();
+}
+function renderListPreview() {
+  const t = S.listType;
+  $('#paper').innerHTML = listDoc(t, S.listRank, S.listRows, { showDir: isMin() && S.dir === 'ALL' });
+}
+function renderEditor(focusLast) {
+  const t = S.listType, hasS = t.subjects.length > 0;
+  $('#edHost').innerHTML = `<table class="ed"><thead><tr><th>#</th>${hasS ? '<th>مادة التخصص</th>' : ''}<th>اللقب</th><th>الاسم</th><th></th></tr></thead><tbody>` +
+    S.listRows.map((r, i) => `<tr><td>${i + 1}</td>${hasS ? `<td><select data-i="${i}" data-f="subject">${t.subjects.map(s => `<option ${s === r.subject ? 'selected' : ''}>${esc(s)}</option>`).join('')}</select></td>` : ''}
+      <td><input data-i="${i}" data-f="last" maxlength="60" value="${esc(r.last)}"></td><td><input data-i="${i}" data-f="first" maxlength="60" value="${esc(r.first)}"></td>
+      <td><button class="btn sm danger" data-del="${i}">✕</button></td></tr>`).join('') + '</tbody></table>';
+  const host = $('#edHost'); let tm;
+  host.oninput = host.onchange = e => {
+    const i = e.target.dataset.i; if (i === undefined) return;
+    S.listRows[+i][e.target.dataset.f] = e.target.value; S.dirty = true;
+    clearTimeout(tm); tm = setTimeout(renderListPreview, 350);
+  };
+  host.onclick = e => {
+    const d = e.target.dataset.del; if (d === undefined) return;
+    S.listRows.splice(+d, 1); S.dirty = true; renderEditor(); renderListPreview();
+  };
+  if (focusLast) { const ins = host.querySelectorAll('input[data-f="last"]'); if (ins.length) ins[ins.length - 1].focus(); }
+}
+function pasteDialog() {
+  const t = S.listType, m = $('#modal');
+  m.innerHTML = `<div class="card"><h1>لصق أسماء من Excel</h1><p class="sub">انسخ عمودين (اللقب ثم الاسم) والصقهما هنا — سطر لكل شخص.</p>
+    ${t.subjects.length ? `<label>مادة التخصص</label><select id="pSub">${t.subjects.map(s => `<option>${esc(s)}</option>`).join('')}</select>` : ''}
+    <label>الأسماء</label><textarea id="pTxt" rows="9"></textarea>
+    <div style="display:flex;gap:8px;margin-top:12px"><button class="btn pri" id="pOk" style="flex:1">إضافة</button><button class="btn" id="pNo">إلغاء</button></div></div>`;
+  show('#modal');
+  $('#pNo').onclick = () => show('#modal', false);
+  $('#pOk').onclick = () => {
+    const sub = $('#pSub') ? $('#pSub').value : '';
+    $('#pTxt').value.split(/\r?\n/).forEach(line => {
+      const p = line.split(/\t|;|،/).map(x => x.trim());
+      if (!p[0] && !p[1]) return;
+      S.listRows.push({ subject: sub, last: p[0] || '', first: p[1] || '' });
+    });
+    S.listRows = S.listRows.filter((r, i, a) => r.last || r.first || a.length === 1);
+    S.dirty = true; show('#modal', false); renderEditor(); renderListPreview();
+  };
+}
+async function saveListNow() {
+  const b = $('#bSave'); busy(b, true);
+  try {
+    const clean = sortedRows(S.listType, S.listRows);
+    await gs('saveList', S.token, listKey(S.listType, S.listRank), clean);
+    S.dirty = false; toast('✔ تم الحفظ (' + clean.length + ' اسماً)');
+    S.listRows = clean.length ? clean : [{ subject: S.listType.subjects[0] || '', last: '', first: '' }];
+    renderEditor(); renderListPreview();
+  } catch (e) { fail(e); } finally { busy(b, false); }
+}
+
+/* ============ الطباعة و PDF ============ */
+function exportDoc() {
+  const v = S.view;
+  if (v.kind === 'T') {
+    const t = S.cfg.tables.find(x => x.id === v.id);
+    return { orient: 'landscape', data: S.draft, name: 'table' + t.no + '_' + dirTag(),
+             html: `<div class="paper landscape export">${countsDoc(t, S.draft, { editable: false, center: S.center })}</div>` };
+  }
+  const t = S.listType;
+  return { orient: 'portrait', data: {}, name: 'liste_' + t.id + '_' + dirTag(),
+           html: `<div class="paper portrait export">${listDoc(t, S.listRank, S.listRows, { showDir: isMin() && S.dir === 'ALL' })}</div>` };
+}
+function doPrint() {
+  const e = exportDoc(), r = $('#printRoot'); r.innerHTML = e.html; recalc(r, e.data);
+  let st = $('#pgStyle'); if (!st) { st = document.createElement('style'); st.id = 'pgStyle'; document.head.appendChild(st); }
+  st.textContent = '@page{size:A4 ' + e.orient + ';margin:0}';
+  setTimeout(() => { window.print(); }, 60);
+}
+async function doPdf() {
+  if (typeof html2pdf === 'undefined') { toast('مكتبة PDF غير محملة — استعمل الطباعة ثم «حفظ كـ PDF».', true); return; }
+  const e = exportDoc(), r = $('#exportRoot'); r.innerHTML = e.html; recalc(r, e.data);
+  const b = $('#bPdf'); busy(b, true);
+  try {
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    await html2pdf().set({
+      margin: 0, filename: e.name + '.pdf', image: { type: 'jpeg', quality: 0.96 },
+      html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: e.orient }
+    }).from(r.firstElementChild).save();
+  } catch (x) { toast('تعذر إنشاء PDF — استعمل الطباعة ثم «حفظ كـ PDF».', true); }
+  finally { r.innerHTML = ''; busy(b, false); }
+}
+window.addEventListener('afterprint', () => { $('#printRoot').innerHTML = ''; });
+
+/* ============ ربط الأحداث ============ */
+$('#lbtn').onclick = doLogin;
+$('#lp').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+$('#lu').addEventListener('keydown', e => { if (e.key === 'Enter') $('#lp').focus(); });
+$('#cbtn').onclick = doChange;
+$('#btnOut').onclick = doLogout;
+$('#btnPw').onclick = () => { if (leave()) { show('#app', false); show('#chg'); show('#ccancel'); } };
+$('#ccancel').onclick = () => { show('#chg', false); show('#ccancel', false); show('#app'); };
+window.addEventListener('beforeunload', e => { if (S.dirty) { e.preventDefault(); e.returnValue = ''; } });
+</script>
+
+</body>
+</html>
